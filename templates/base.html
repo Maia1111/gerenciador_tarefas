@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TaskFlow - Gerenciador de Tarefas Moderno{% endblock %}</title>
+    
+    <!-- Meta Tags para SEO e Performance -->
+    <meta name="description" content="TaskFlow - Gerenciador de tarefas moderno e responsivo">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Favicon -->
+    {% load static %}
+    <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+    <link rel="apple-touch-icon" href="{% static 'favicon.ico' %}">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- External Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ===== DESIGN SYSTEM VARIABLES ===== */
+        :root {
+            /* Core Colors - Modern 2024-2025 Palette */
+            --primary-50: #f0f4ff;
+            --primary-100: #e0edff;
+            --primary-200: #c7dbff;
+            --primary-300: #a4c0ff;
+            --primary-400: #8b9dff;
+            --primary-500: #7c3aed;
+            --primary-600: #6d28d9;
+            --primary-700: #5b21b6;
+            --primary-800: #4c1d95;
+            --primary-900: #3c1a78;
+            
+            /* Semantic Colors - Enhanced for 2024-2025 */
+            --success-50: #f0fdf9;
+            --success-100: #dcfce7;
+            --success-500: #22c55e;
+            --success-600: #16a34a;
+            --success-700: #15803d;
+            --success-800: #166534;
+            
+            --danger-50: #fef2f2;
+            --danger-100: #fee2e2;
+            --danger-500: #f43f5e;
+            --danger-600: #e11d48;
+            --danger-700: #be123c;
+            --danger-800: #9f1239;
+            
+            --warning-50: #fffbeb;
+            --warning-100: #fef3c7;
+            --warning-500: #f59e0b;
+            --warning-600: #d97706;
+            --warning-700: #b45309;
+            --warning-800: #92400e;
+            
+            --info-50: #eff6ff;
+            --info-100: #dbeafe;
+            --info-500: #06b6d4;
+            --info-600: #0891b2;
+            --info-700: #0e7490;
+            --info-800: #155e75;
+            
+            /* Neutral Colors - Modern Grayscale */
+            --neutral-50: #f8fafc;
+            --neutral-100: #f1f5f9;
+            --neutral-200: #e2e8f0;
+            --neutral-300: #cbd5e1;
+            --neutral-400: #94a3b8;
+            --neutral-500: #64748b;
+            --neutral-600: #475569;
+            --neutral-700: #334155;
+            --neutral-800: #1e293b;
+            --neutral-900: #0f172a;
+            
+            /* Brand Colors */
+            --brand-primary: #7c3aed;
+            --brand-secondary: #06b6d4;
+            --brand-accent: #f59e0b;
+            
+            /* Typography */
+            --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-family-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+            
+            /* Spacing Scale */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            --space-16: 4rem;
+            --space-20: 5rem;
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            --radius-3xl: 2rem;
+            --radius-full: 9999px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+            
+            /* Glassmorphism */
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            --glass-blur: blur(20px);
+            
+            /* Animations */
+            --transition-fast: 150ms ease;
+            --transition-normal: 300ms ease;
+            --transition-slow: 500ms ease;
+            --transition-bounce: 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            
+            /* Z-Index Scale */
+            --z-dropdown: 1000;
+            --z-sticky: 1020;
+            --z-fixed: 1030;
+            --z-modal-backdrop: 1040;
+            --z-modal: 1050;
+            --z-popover: 1060;
+            --z-tooltip: 1070;
+            --z-toast: 1080;
+        }
+        
+        /* ===== DARK MODE SUPPORT ===== */
+        [data-theme="dark"] {
+            /* Dark theme color overrides */
+            --neutral-50: #0f172a;
+            --neutral-100: #1e293b;
+            --neutral-200: #334155;
+            --neutral-300: #475569;
+            --neutral-400: #64748b;
+            --neutral-500: #94a3b8;
+            --neutral-600: #cbd5e1;
+            --neutral-700: #e2e8f0;
+            --neutral-800: #f1f5f9;
+            --neutral-900: #f8fafc;
+            
+            /* Dark background */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            
+            /* Dark text colors */
+            --text-primary: #f8fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+        
+        [data-theme="light"] {
+            /* Light theme (default) */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            
+            --text-primary: #1e293b;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+        }
+        
+        /* Auto dark mode based on system preference */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme]) {
+                --neutral-50: #0f172a;
+                --neutral-100: #1e293b;
+                --neutral-200: #334155;
+                --neutral-300: #475569;
+                --neutral-400: #64748b;
+                --neutral-500: #94a3b8;
+                --neutral-600: #cbd5e1;
+                --neutral-700: #e2e8f0;
+                --neutral-800: #f1f5f9;
+                --neutral-900: #f8fafc;
+                
+                --bg-primary: #0f172a;
+                --bg-secondary: #1e293b;
+                --bg-tertiary: #334155;
+                
+                --text-primary: #f8fafc;
+                --text-secondary: #e2e8f0;
+                --text-muted: #94a3b8;
+            }
+        }
+        
+        /* ===== RESET & BASE STYLES ===== */
+        * {
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+        
+        body {
+            font-family: var(--font-family-sans);
+            font-weight: 400;
+            line-height: 1.6;
+            color: var(--neutral-800);
+            background: #000;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* ===== ADVANCED BACKGROUND SYSTEM ===== */
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
+        }
+        
+        .bg-mesh-gradient {
+            background: 
+                radial-gradient(at 40% 20%, var(--primary-600) 0px, transparent 50%),
+                radial-gradient(at 80% 0%, var(--info-600) 0px, transparent 50%),
+                radial-gradient(at 0% 50%, var(--success-600) 0px, transparent 50%),
+                radial-gradient(at 80% 50%, var(--warning-600) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, var(--danger-600) 0px, transparent 50%),
+                radial-gradient(at 80% 100%, var(--primary-700) 0px, transparent 50%),
+                radial-gradient(at 0% 0%, var(--info-700) 0px, transparent 50%);
+        }
+        
+        /* Modern Static Background - Elegant and Stable */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #334155 60%, #475569 100%);
+            z-index: -3;
+        }
+        
+        /* Floating Orbs - Estáticos */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 60% 70%, rgba(255, 200, 120, 0.3) 0%, transparent 50%);
+            opacity: 0.7;
+            z-index: -2;
+        }
+        
+        /* Particle System */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: particleFloat 6s linear infinite;
+        }
+        
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* ===== MODERN COMPONENT SYSTEM ===== */
+        
+        /* Glass Card Component */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--glass-shadow);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Modern Navbar */
+        .navbar-modern {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+            transition: all var(--transition-normal);
+        }
+        
+        .navbar-brand-modern {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-600), var(--info-600));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            transition: all var(--transition-normal);
+        }
+        
+        .navbar-brand-modern:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+        
+        .nav-link-modern {
+            font-weight: 500;
+            color: var(--neutral-700) !important;
+            padding: var(--space-2) var(--space-4) !important;
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-link-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            transition: left var(--transition-normal);
+        }
+        
+        .nav-link-modern:hover {
+            color: var(--primary-600) !important;
+            background: rgba(99, 102, 241, 0.05);
+            transform: translateY(-2px);
+        }
+        
+        .nav-link-modern:hover::before {
+            left: 100%;
+        }
+        
+        /* Modern Buttons */
+        .btn-modern {
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            padding: var(--space-3) var(--space-6);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+            text-transform: none;
+            letter-spacing: 0.025em;
+        }
+        
+        .btn-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left var(--transition-fast);
+        }
+        
+        .btn-modern:hover::before {
+            left: 100%;
+        }
+        
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-modern:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary-modern {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+            color: white;
+        }
+        
+        .btn-success-modern {
+            background: linear-gradient(135deg, var(--success-600), var(--success-700));
+            color: white;
+        }
+        
+        .btn-danger-modern {
+            background: linear-gradient(135deg, var(--danger-600), var(--danger-700));
+            color: white;
+        }
+        
+        .btn-outline-modern {
+            background: transparent;
+            border: 2px solid currentColor;
+            color: var(--neutral-700);
+        }
+        
+        .btn-outline-modern:hover {
+            background: currentColor;
+            color: white;
+        }
+        
+        /* Modern Forms */
+        .form-control-modern {
+            border: 2px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4);
+            font-size: 1rem;
+            transition: all var(--transition-normal);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-control-modern:focus {
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background: white;
+            transform: translateY(-1px);
+        }
+        
+        .form-control-modern::placeholder {
+            color: var(--neutral-400);
+            font-weight: 400;
+        }
+        
+        .form-label-modern {
+            font-weight: 600;
+            color: var(--neutral-700);
+            margin-bottom: var(--space-2);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Modern Cards */
+        .card-modern {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-normal);
+            overflow: hidden;
+        }
+        
+        .card-modern:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-2xl);
+        }
+        
+        /* Task Cards */
+        .task-card-modern {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius-xl);
+            transition: all var(--transition-normal);
+        }
+        
+        .task-card-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary-500), var(--primary-700));
+        }
+        
+        .task-card-completed {
+            background: linear-gradient(135deg, var(--success-50), var(--success-100));
+            border: 1px solid var(--success-200);
+        }
+        
+        .task-card-completed::before {
+            background: linear-gradient(180deg, var(--success-500), var(--success-700));
+        }
+        
+        .task-card-overdue {
+            background: linear-gradient(135deg, var(--danger-50), var(--danger-100));
+            border: 1px solid var(--danger-200);
+        }
+        
+        .task-card-overdue::before {
+            background: linear-gradient(180deg, var(--danger-500), var(--danger-700));
+        }
+        
+        .task-card-pending {
+            background: linear-gradient(135deg, var(--neutral-50), var(--neutral-100));
+            border: 1px solid var(--neutral-200);
+        }
+        
+        /* Status Badges */
+        .status-badge-modern {
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-completed {
+            background: var(--success-100);
+            color: var(--success-800);
+        }
+        
+        .status-overdue {
+            background: var(--danger-100);
+            color: var(--danger-800);
+        }
+        
+        .status-pending {
+            background: var(--warning-100);
+            color: var(--warning-800);
+        }
+        
+        /* Floating Action Button */
+        .fab-modern {
+            position: fixed;
+            bottom: var(--space-8);
+            right: var(--space-8);
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radius-full);
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+            color: white;
+            border: none;
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            transition: all var(--transition-normal);
+            z-index: var(--z-fixed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .fab-modern:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 12px 35px rgba(99, 102, 241, 0.6);
+        }
+        
+        .fab-modern:active {
+            transform: scale(0.95) rotate(90deg);
+        }
+        
+        /* Auth Container */
+        .auth-container-modern {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-8) var(--space-4);
+        }
+        
+        /* Auth Containers - Clean and Modern */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+        
+        .auth-container-clean {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+        
+        .auth-card {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .auth-card-clean {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-title {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .auth-subtitle {
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .auth-icon-simple {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin: 0 auto 1rem;
+        }
+        
+        /* Auth Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group-clean {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-label-clean {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .input-container {
+            position: relative;
+        }
+        
+        .form-control-modern {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        .form-control-clean {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        .form-control-modern:focus,
+        .form-control-clean:focus {
+            outline: none;
+            border-color: var(--primary-400);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .form-control-modern::placeholder,
+        .form-control-clean::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .focus-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            width: 0;
+            background: var(--primary-500);
+            transition: width 0.3s ease;
+        }
+        
+        .form-control-modern:focus + .focus-line {
+            width: 100%;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: color 0.3s ease;
+        }
+        
+        .password-toggle:hover {
+            color: var(--primary-600);
+        }
+        
+        .password-toggle-clean {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: color 0.3s ease;
+        }
+        
+        .password-toggle-clean:hover {
+            color: var(--primary-600);
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .validation-feedback {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+        
+        .validation-feedback.success {
+            color: var(--success-600);
+        }
+        
+        .validation-feedback.error {
+            color: var(--danger-600);
+        }
+        
+        .error-message {
+            color: var(--danger-600);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+        
+        .password-strength-container {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .password-strength-label {
+            font-size: 0.8rem;
+            color: #e2e8f0;
+            margin-bottom: 0.5rem;
+        }
+        
+        .password-strength-bar {
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .password-strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .password-strength-text {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            text-align: center;
+        }
+        
+        .form-progress {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary-400);
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #e2e8f0;
+        }
+        
+        .btn-auth {
+            width: 100%;
+            padding: 0.875rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+            color: white;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+            background: linear-gradient(135deg, var(--primary-400), var(--primary-500));
+        }
+        
+        .btn-auth:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+        
+        .auth-divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+            color: #64748b;
+        }
+        
+        .auth-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e2e8f0;
+        }
+        
+        .auth-divider span {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0 1rem;
+        }
+        
+        .auth-links {
+            text-align: center;
+        }
+        
+        .auth-links p {
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 1rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .auth-link {
+            color: #a5b4fc;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: rgba(99, 102, 241, 0.2);
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        
+        .auth-link:hover {
+            color: #ffffff;
+            background: rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .auth-card-modern {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-3xl);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            padding: var(--space-12);
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            overflow: hidden;
+            animation: authCardAppear 0.8s ease-out;
+        }
+        
+        @keyframes authCardAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .auth-card-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-600), var(--info-600), var(--success-600), var(--warning-600));
+            background-size: 200% 100%;
+            animation: authCardShimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes authCardShimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* Empty State */
+        .empty-state-modern {
+            text-align: center;
+            padding: var(--space-20) var(--space-8);
+            color: var(--neutral-600);
+        }
+        
+        .empty-state-modern .empty-icon {
+            font-size: 4rem;
+            color: var(--neutral-300);
+            margin-bottom: var(--space-6);
+            opacity: 0.8;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .auth-card-modern {
+                padding: var(--space-8);
+                border-radius: var(--radius-2xl);
+            }
+            
+            .fab-modern {
+                bottom: var(--space-6);
+                right: var(--space-6);
+                width: 56px;
+                height: 56px;
+                font-size: 1.25rem;
+            }
+            
+            .navbar-brand-modern {
+                font-size: 1.25rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .auth-container-modern {
+                padding: var(--space-4);
+            }
+            
+            .auth-card-modern {
+                padding: var(--space-6);
+            }
+        }
+        
+        /* Utility Classes */
+        .text-gradient {
+            background: linear-gradient(135deg, var(--primary-600), var(--info-600));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .animate-bounce-subtle {
+            animation: bounceSubtle 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounceSubtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        
+        .animate-pulse-slow {
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Loading States */
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        /* Accessibility Improvements */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Focus Styles */
+        .focus-visible {
+            outline: 2px solid var(--primary-500);
+            outline-offset: 2px;
+        }
+        
+        /* Modern Toast Notifications */
+        .toast-modern {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: var(--space-3);
+            min-width: 350px;
+            max-width: 420px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .toast-modern.animate-in {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .toast-modern.animate-out {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        
+        .toast-header {
+            display: flex;
+            align-items: center;
+            padding: var(--space-4) var(--space-4) var(--space-3);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .toast-body {
+            padding: var(--space-3) var(--space-4) var(--space-4);
+            color: var(--neutral-700);
+            line-height: 1.5;
+        }
+        
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .toast-progress-bar {
+            height: 100%;
+            width: 100%;
+            transform-origin: left;
+        }
+        
+        .btn-close-modern {
+            background: none;
+            border: none;
+            color: var(--neutral-500);
+            cursor: pointer;
+            padding: var(--space-1);
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
+            margin-left: auto;
+        }
+        
+        .btn-close-modern:hover {
+            color: var(--neutral-700);
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        @keyframes toastProgress {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+        
+        /* Toast animations for different screen sizes */
+        @media (max-width: 768px) {
+            .toast-modern {
+                min-width: calc(100vw - 2rem);
+                max-width: calc(100vw - 2rem);
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .navbar-modern,
+            .fab-modern,
+            .particles,
+            .toast-container {
+                display: none !important;
+            }
+            
+            body::before,
+            body::after {
+                display: none !important;
+            }
+            
+            .glass-card,
+            .card-modern {
+                background: white !important;
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+            }
+        }
+        
+        /* Navbar Minimalista */
+        .navbar-minimal {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #2d3748;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand:hover {
+            color: #667eea;
+            transform: translateY(-1px);
+        }
+        
+        .navbar-brand i {
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+        
+        .navbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: #4a5568;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .nav-link i {
+            font-size: 1rem;
+        }
+        
+        .nav-divider {
+            width: 1px;
+            height: 24px;
+            background: #e2e8f0;
+            margin: 0 0.5rem;
+        }
+        
+        .user-menu {
+            position: relative;
+        }
+        
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 25px;
+            color: #667eea;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .user-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            padding: 0.5rem 0;
+            min-width: 150px;
+            z-index: 1001;
+            display: none;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            color: #4a5568;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .user-dropdown a:hover {
+            background: #f7fafc;
+            color: #667eea;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: #4a5568;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+        
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .navbar-menu {
+                position: fixed;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                align-items: stretch;
+                padding: 1rem;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                transform: translateY(-100%);
+                opacity: 0;
+                pointer-events: none;
+                transition: all 0.3s ease;
+            }
+            
+            .navbar-menu.mobile-open {
+                transform: translateY(0);
+                opacity: 1;
+                pointer-events: auto;
+            }
+            
+            .nav-link {
+                padding: 1rem;
+                border-bottom: 1px solid #f7fafc;
+            }
+            
+            .nav-link:last-child {
+                border-bottom: none;
+            }
+            
+            .nav-divider {
+                display: none;
+            }
+            
+            .user-menu {
+                width: 100%;
+            }
+            
+            .user-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .user-dropdown {
+                position: static;
+                box-shadow: none;
+                background: #f7fafc;
+                margin-top: 0.5rem;
+                border-radius: 8px;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+        
+        /* Ajuste para o conteúdo principal */
+        .main-content {
+            margin-top: 80px;
+        }
+        
+        /* Páginas de autenticação sem navbar */
+        .auth-page .main-content {
+            margin-top: 0;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                margin-top: 70px;
+            }
+            
+            .auth-page .main-content {
+                margin-top: 0;
+            }
+        }
+
+        /* Estilos para o Menu Dropdown Global */
+        .global-task-menu-styles {
+            display: none;
+            position: absolute; /* Usamos absolute, pois o script calcula a posição na tela */
+            z-index: 2147483647; /* O maior z-index possível para garantir que fique na frente */
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 0.5rem 0;
+            min-width: 140px;
+            border: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        .global-task-menu-styles a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            color: #334155;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .global-task-menu-styles a:hover {
+            background-color: #f1f5f9;
+        }
+
+        .global-task-menu-styles a.delete-action {
+            color: #ef4444;
+        }
+
+        .global-task-menu-styles a.delete-action:hover {
+            background-color: #fee2e2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Particle System -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- Modern Navigation - Only show for authenticated users and not on login/register pages -->
+    {% if user.is_authenticated and request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' %}
+    <nav class="navbar-minimal">
+        <div class="container-fluid px-4">
+            <div class="navbar-content">
+                <a class="navbar-brand" href="{% url 'task_list' %}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>TaskFlow</span>
+                </a>
+                
+                <div class="navbar-menu">
+                    <a class="nav-link" href="{% url 'task_list' %}">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a class="nav-link" href="{% url 'task_create' %}">
+                        <i class="fas fa-plus"></i>
+                        <span>Nova Tarefa</span>
+                    </a>
+                    <a class="nav-link" href="{% url 'category_list' %}">
+                        <i class="fas fa-folder"></i>
+                        <span>Categorias</span>
+                    </a>
+                    
+                    <div class="nav-divider"></div>
+                    
+                    <div class="user-menu">
+                        <button class="user-btn" onclick="toggleUserMenu()">
+                            <i class="fas fa-user-circle"></i>
+                            <span>{{ user.username }}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-dropdown" id="userDropdown">
+                            <a href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Sair</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+    
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 11000;">
+        <!-- Toasts will be dynamically added here -->
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Floating Action Button -->
+    {% if user.is_authenticated %}
+        <button class="fab-modern" onclick="window.location.href='{% url 'task_create' %}'">
+            <i class="fas fa-plus"></i>
+        </button>
+    {% endif %}
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        // Particle System
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Enhanced Form Validation
+        function enhanceFormValidation() {
+            const forms = document.querySelectorAll('.needs-validation');
+            forms.forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+            });
+        }
+        
+        // Smooth Scroll for Anchor Links
+        function initSmoothScroll() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        }
+        
+        // Initialize on DOM Load
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            enhanceFormValidation();
+            initSmoothScroll();
+            ThemeManager.init();
+            
+            // Note: Removed global button loading effect - now handled per form
+        });
+        
+        // Navbar functions
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        function toggleMobileMenu() {
+            const navbar = document.querySelector('.navbar-menu');
+            navbar.classList.toggle('mobile-open');
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.user-menu')) {
+                document.getElementById('userDropdown').style.display = 'none';
+            }
+        });
+        
+        // Modern Toast Notification System
+        window.ToastManager = {
+            show: function(message, type = 'info', duration = 5000) {
+                const toastContainer = document.querySelector('.toast-container');
+                const toastId = 'toast_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                const icons = {
+                    success: 'fas fa-check-circle',
+                    error: 'fas fa-exclamation-circle',
+                    warning: 'fas fa-exclamation-triangle',
+                    info: 'fas fa-info-circle'
+                };
+                
+                const colors = {
+                    success: 'var(--success-500)',
+                    error: 'var(--danger-500)',
+                    warning: 'var(--warning-500)',
+                    info: 'var(--info-500)'
+                };
+                
+                const toast = document.createElement('div');
+                toast.id = toastId;
+                toast.className = 'toast-modern show';
+                toast.innerHTML = `
+                    <div class="toast-header">
+                        <i class="${icons[type]} me-2" style="color: ${colors[type]};"></i>
+                        <strong class="me-auto">TaskFlow</strong>
+                        <small class="text-muted">agora</small>
+                        <button type="button" class="btn-close-modern" onclick="ToastManager.hide('${toastId}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <div class="toast-progress">
+                        <div class="toast-progress-bar" style="background-color: ${colors[type]};"></div>
+                    </div>
+                `;
+                
+                toastContainer.appendChild(toast);
+                
+                // Animate in
+                setTimeout(() => {
+                    toast.classList.add('animate-in');
+                }, 100);
+                
+                // Auto hide
+                if (duration > 0) {
+                    const progressBar = toast.querySelector('.toast-progress-bar');
+                    progressBar.style.animation = `toastProgress ${duration}ms linear`;
+                    
+                    setTimeout(() => {
+                        this.hide(toastId);
+                    }, duration);
+                }
+            },
+            
+            hide: function(toastId) {
+                const toast = document.getElementById(toastId);
+                if (toast) {
+                    toast.classList.add('animate-out');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }
+            },
+            
+            success: function(message, duration = 5000) {
+                this.show(message, 'success', duration);
+            },
+            
+            error: function(message, duration = 7000) {
+                this.show(message, 'error', duration);
+            },
+            
+            warning: function(message, duration = 6000) {
+                this.show(message, 'warning', duration);
+            },
+            
+            info: function(message, duration = 5000) {
+                this.show(message, 'info', duration);
+            }
+        };
+
+        // Theme Management System
+        window.ThemeManager = {
+            init: function() {
+                // Load saved theme or detect system preference
+                const savedTheme = localStorage.getItem('taskflow-theme');
+                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
+                if (savedTheme) {
+                    this.setTheme(savedTheme);
+                } else if (systemDark) {
+                    this.setTheme('dark');
+                } else {
+                    this.setTheme('light');
+                }
+                
+                // Listen for system theme changes
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                    if (!localStorage.getItem('taskflow-theme')) {
+                        this.setTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+                
+                this.updateToggleButton();
+            },
+            
+            setTheme: function(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('taskflow-theme', theme);
+                this.updateToggleButton();
+                
+                // Update dynamic background for theme
+                this.updateBackground(theme);
+            },
+            
+            updateBackground: function(theme) {
+                const body = document.body;
+                if (theme === 'dark') {
+                    body.style.setProperty('--bg-gradient-start', '#0f172a');
+                    body.style.setProperty('--bg-gradient-end', '#1e293b');
+                } else {
+                    body.style.setProperty('--bg-gradient-start', '#f8fafc');
+                    body.style.setProperty('--bg-gradient-end', '#e2e8f0');
+                }
+            },
+            
+            updateToggleButton: function() {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const themeIcon = document.getElementById('themeIcon');
+                const themeText = document.getElementById('themeText');
+                
+                if (currentTheme === 'dark') {
+                    themeIcon.className = 'fas fa-moon me-2';
+                    themeText.textContent = 'Modo Claro';
+                } else {
+                    themeIcon.className = 'fas fa-sun me-2';
+                    themeText.textContent = 'Modo Escuro';
+                }
+            },
+            
+            toggle: function() {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                this.setTheme(newTheme);
+                
+                // Show notification
+                ToastManager.success(`Tema alterado para modo ${newTheme === 'dark' ? 'escuro' : 'claro'}!`);
+            }
+        };
+        
+        // Theme toggle function for button
+        function toggleTheme() {
+            ThemeManager.toggle();
+        }
+
+        // Service Worker Registration (Progressive Web App)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+
+    <!-- Menu Dropdown Global (Solução Definitiva) -->
+    <div id="global-task-menu" class="global-task-menu-styles">
+        <a href="#" id="global-edit-task-link">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+        <a href="#" id="global-delete-task-link" class="delete-action">
+            <i class="fas fa-trash"></i> Excluir
+        </a>
+    </div>
+
+    <script>
+    // Lógica para o Menu Dropdown Global
+    function showGlobalTaskMenu(button, editUrl, deleteUrl) {
+        const menu = document.getElementById('global-task-menu');
+        
+        // Se o menu já estiver visível para este botão, esconde
+        if (menu.style.display === 'block' && menu.dataset.ownerId === button.id) {
+            menu.style.display = 'none';
+            return;
+        }
+
+        // Adiciona um ID único ao botão se ele não tiver, para referência
+        if (!button.id) {
+            button.id = `task-menu-btn-${Math.random().toString(36).substr(2, 9)}`;
+        }
+        menu.dataset.ownerId = button.id;
+
+        const rect = button.getBoundingClientRect();
+
+        // Atualiza os links do menu com as URLs da tarefa clicada
+        document.getElementById('global-edit-task-link').href = editUrl;
+        document.getElementById('global-delete-task-link').href = deleteUrl;
+
+        // Posição vertical: Alinhamos com o topo do botão e subtraímos 30px
+        // para que o menu apareça ainda mais para cima.
+        menu.style.top = `${rect.top + window.scrollY - 30}px`;
+        
+        // Posição horizontal: Alinha a direita do menu com a direita do botão.
+        menu.style.left = `${rect.right + window.scrollX - 140}px`; // 140px é a largura do menu.
+        
+        // Exibe o menu
+        menu.style.display = 'block';
+    }
+
+    // Fecha o menu se o usuário clicar em qualquer outro lugar da tela
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('global-task-menu');
+        if (!menu) return;
+
+        // Verifica se o clique foi fora do menu e não em um botão de menu
+        if (!menu.contains(e.target) && !e.target.closest('.menu-btn')) {
+            menu.style.display = 'none';
+        }
+    });
+    </script>
+</body>
+</html> 

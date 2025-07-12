@@ -1,0 +1,481 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Nova Categoria - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="category-form-mini">
+    <div class="container px-4 py-3">
+        <!-- Header Compacto -->
+        <div class="form-header-mini">
+            <h1 class="form-title-mini">📁 Nova Categoria</h1>
+            <a href="{% url 'task_list' %}" class="btn-back-mini">← Voltar</a>
+        </div>
+
+        <!-- Formulário Compacto -->
+        <div class="form-card-mini">
+            <form method="post" id="categoryForm">
+                {% csrf_token %}
+                
+                <!-- Nome -->
+                <div class="field-mini">
+                    <label class="label-mini">🏷️ Nome</label>
+                    {{ form.name|add_class:'input-mini'|attr:'placeholder:Ex: Trabalho, Estudos, Casa' }}
+                    {% if form.name.errors %}
+                        <div class="error-mini">{{ form.name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Grid de Campos -->
+                <div class="fields-grid-mini">
+                    <!-- Ícone -->
+                    <div class="field-mini">
+                        <label class="label-mini">🎨 Ícone</label>
+                        {{ form.icon|add_class:'select-mini' }}
+                    </div>
+
+                    <!-- Cor -->
+                    <div class="field-mini">
+                        <label class="label-mini">🌈 Cor</label>
+                        <div class="color-picker-mini">
+                            {{ form.color|add_class:'input-mini color-input-mini' }}
+                            <div class="color-preview-mini" id="colorPreview"></div>
+                        </div>
+                        <div class="color-presets-mini">
+                            <div class="color-preset-mini" data-color="#667eea" style="background: #667eea;"></div>
+                            <div class="color-preset-mini" data-color="#48bb78" style="background: #48bb78;"></div>
+                            <div class="color-preset-mini" data-color="#ed8936" style="background: #ed8936;"></div>
+                            <div class="color-preset-mini" data-color="#f56565" style="background: #f56565;"></div>
+                            <div class="color-preset-mini" data-color="#9f7aea" style="background: #9f7aea;"></div>
+                            <div class="color-preset-mini" data-color="#38b2ac" style="background: #38b2ac;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div class="preview-mini" id="categoryPreview">
+                    <div class="preview-icon-mini">
+                        <i class="fas fa-folder" id="previewIcon"></i>
+                    </div>
+                    <div class="preview-content-mini">
+                        <span class="preview-name-mini" id="previewName">Nome da Categoria</span>
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div class="actions-mini">
+                    <button type="button" class="btn-reset-mini" onclick="resetForm()">
+                        🔄 Limpar
+                    </button>
+                    <button type="submit" class="btn-save-mini" id="saveBtn">
+                        <span id="saveIcon">💾</span>
+                        <span id="saveText">Criar Categoria</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Dicas Rápidas -->
+        <div class="tips-mini">
+            <div class="tip-mini">💡 <strong>Dica:</strong> Use nomes específicos como "Trabalho" ou "Estudos"</div>
+            <div class="tip-mini">🎨 <strong>Visual:</strong> Escolha cores distintas para cada categoria</div>
+            <div class="tip-mini">📂 <strong>Organize:</strong> Agrupe tarefas por contexto de vida</div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('categoryForm');
+    const nameInput = document.getElementById('{{ form.name.id_for_label }}');
+    const iconSelect = document.getElementById('{{ form.icon.id_for_label }}');
+    const colorInput = document.getElementById('{{ form.color.id_for_label }}');
+    const saveBtn = document.getElementById('saveBtn');
+    const saveIcon = document.getElementById('saveIcon');
+    const saveText = document.getElementById('saveText');
+    const colorPreview = document.getElementById('colorPreview');
+    const colorPresets = document.querySelectorAll('.color-preset-mini');
+    
+    // Preview elements
+    const previewIcon = document.getElementById('previewIcon');
+    const previewName = document.getElementById('previewName');
+    const categoryPreview = document.getElementById('categoryPreview');
+
+    // Auto-focus
+    nameInput.focus();
+
+    // Update preview
+    function updatePreview() {
+        const name = nameInput.value.trim() || 'Nome da Categoria';
+        const icon = iconSelect.value || 'fas fa-folder';
+        const color = colorInput.value || '#667eea';
+        
+        previewName.textContent = name;
+        previewIcon.className = icon;
+        previewIcon.style.color = color;
+        categoryPreview.style.borderLeftColor = color;
+        colorPreview.style.backgroundColor = color;
+    }
+
+    // Event listeners
+    nameInput.addEventListener('input', updatePreview);
+    iconSelect.addEventListener('change', updatePreview);
+    colorInput.addEventListener('input', updatePreview);
+    
+    // Color presets
+    colorPresets.forEach(preset => {
+        preset.addEventListener('click', function() {
+            const color = this.dataset.color;
+            colorInput.value = color;
+            updatePreview();
+            
+            // Visual feedback
+            colorPresets.forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        if (!nameInput.value.trim()) {
+            e.preventDefault();
+            nameInput.focus();
+            nameInput.style.borderColor = '#ff6b6b';
+            setTimeout(() => {
+                nameInput.style.borderColor = '';
+            }, 2000);
+            return;
+        }
+
+        // Loading state
+        saveBtn.disabled = true;
+        saveIcon.textContent = '⏳';
+        saveText.textContent = 'Criando...';
+        saveBtn.style.opacity = '0.7';
+    });
+
+    // Reset form
+    window.resetForm = function() {
+        if (confirm('Limpar todos os campos?')) {
+            form.reset();
+            updatePreview();
+            colorPresets.forEach(p => p.classList.remove('active'));
+            nameInput.focus();
+        }
+    };
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            form.submit();
+        }
+        if (e.key === 'Escape') {
+            window.location.href = '{% url "task_list" %}';
+        }
+    });
+
+    // Initialize
+    updatePreview();
+});
+</script>
+
+<style>
+/* Herdar estilos do formulário de tarefas */
+.category-form-mini {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1rem 0;
+}
+
+.form-header-mini {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.form-title-mini {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-back-mini {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.btn-back-mini:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-1px);
+    color: white;
+}
+
+.form-card-mini {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+.field-mini {
+    margin-bottom: 1rem;
+}
+
+.label-mini {
+    display: block;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.input-mini, .select-mini {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+.input-mini:focus, .select-mini:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-1px);
+}
+
+.fields-grid-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Color Picker Mini */
+.color-picker-mini {
+    position: relative;
+}
+
+.color-input-mini {
+    padding-right: 3rem !important;
+}
+
+.color-preview-mini {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 2px solid #e2e8f0;
+    background: #667eea;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.color-preview-mini:hover {
+    transform: translateY(-50%) scale(1.1);
+}
+
+.color-presets-mini {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.color-preset-mini {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.color-preset-mini:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.color-preset-mini.active {
+    border-color: white;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.5);
+}
+
+/* Preview Mini */
+.preview-mini {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-left: 4px solid #667eea;
+    transition: all 0.3s ease;
+}
+
+.preview-icon-mini {
+    width: 40px;
+    height: 40px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: #667eea;
+}
+
+.preview-name-mini {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1rem;
+}
+
+.actions-mini {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+.btn-reset-mini, .btn-save-mini {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.btn-reset-mini {
+    background: #f7fafc;
+    color: #4a5568;
+    border: 2px solid #e2e8f0;
+}
+
+.btn-reset-mini:hover {
+    background: #edf2f7;
+    transform: translateY(-1px);
+}
+
+.btn-save-mini {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.btn-save-mini:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+}
+
+.btn-save-mini:disabled {
+    cursor: not-allowed;
+}
+
+.tips-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.75rem;
+}
+
+.tip-mini {
+    background: rgba(255,255,255,0.9);
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #4a5568;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.error-mini {
+    color: #e53e3e;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+.select-mini {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .form-header-mini {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .form-title-mini {
+        font-size: 1.5rem;
+    }
+    
+    .fields-grid-mini {
+        grid-template-columns: 1fr;
+    }
+    
+    .actions-mini {
+        flex-direction: column;
+    }
+    
+    .btn-reset-mini, .btn-save-mini {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .tips-mini {
+        grid-template-columns: 1fr;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-card-mini, .tips-mini {
+    animation: slideUp 0.5s ease;
+}
+
+.input-mini:hover, .select-mini:hover {
+    border-color: #cbd5e0;
+    background: white;
+}
+</style>
+{% endblock %}

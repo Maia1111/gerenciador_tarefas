@@ -1,0 +1,1177 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - TaskFlow{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="dashboard-container">
+    <!-- Header Minimalista -->
+    <div class="dashboard-header">
+        <div class="container-fluid px-4 py-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="dashboard-title">
+                        <span class="greeting">Olá, {{ user.username }}!</span>
+                        <small class="dashboard-subtitle">Vamos organizar seu dia</small>
+                    </h1>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn-add-task" onclick="window.location.href='{% url 'task_create' %}'">
+                        <i class="fas fa-plus"></i>
+                        <span>Nova Tarefa</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Minimalistas -->
+    <div class="stats-section">
+        <div class="container-fluid px-4">
+            <div class="stats-grid">
+                <div class="stat-card stat-total">
+                    <div class="stat-icon">
+                        <i class="fas fa-list-ul"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ total_tasks }}</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card stat-completed">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ completed_tasks }}</div>
+                        <div class="stat-label">Concluídas</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card stat-pending">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ pending_tasks }}</div>
+                        <div class="stat-label">Pendentes</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card stat-overdue">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ overdue_tasks }}</div>
+                        <div class="stat-label">Atrasadas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros Minimalistas -->
+    <div class="filters-section">
+        <div class="container-fluid px-4">
+            <div class="filters-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar tarefas..." onkeyup="filterTasks()">
+                </div>
+                
+                <div class="filters-controls">
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all" data-type="status">
+                            Todas
+                        </button>
+                        <button class="filter-btn" data-filter="pending" data-type="status">
+                            Pendentes
+                        </button>
+                        <button class="filter-btn" data-filter="completed" data-type="status">
+                            Concluídas
+                        </button>
+                        <button class="filter-btn" data-filter="overdue" data-type="status">
+                            Atrasadas
+                        </button>
+                    </div>
+                    
+                    <!-- Toggle de Visualização -->
+                    <div class="view-toggle">
+                        <span class="view-toggle-label">Visualização:</span>
+                        <div class="view-toggle-buttons">
+                            <button class="view-btn active" data-view="cards" title="Visualização em Cards">
+                                <i class="fas fa-th"></i>
+                                <span>Cards</span>
+                            </button>
+                            <button class="view-btn" data-view="list" title="Visualização em Lista">
+                                <i class="fas fa-list"></i>
+                                <span>Lista</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Grid de Tarefas Minimalista -->
+    <div class="tasks-section">
+        <div class="container-fluid px-4 pb-5">
+            {% if tasks %}
+                <div class="tasks-grid" id="tasksGrid">
+                    {% for task in tasks %}
+                        <div class="task-item" 
+                             data-status="{% if task.completed %}completed{% elif task.due_date and task.due_date < today %}overdue{% else %}pending{% endif %}"
+                             data-title="{{ task.title|lower }}"
+                             data-description="{{ task.description|lower }}"
+                             data-priority="{{ task.priority }}"
+                             data-category="{% if task.category %}{{ task.category.id }}{% endif %}">
+                            
+                            <div class="task-card task-{{ task.priority }} {% if task.completed %}task-completed{% elif task.due_date and task.due_date < today %}task-overdue{% endif %}" 
+                                 data-task-id="{{ task.id }}">
+                                
+                                <!-- Task Header -->
+                                <div class="task-header">
+                                    <div class="task-status">
+                                        <button class="status-toggle" 
+                                                onclick="toggleTaskStatus({{ task.pk }}, {% if task.completed %}true{% else %}false{% endif %})">
+                                            {% if task.completed %}
+                                                <i class="fas fa-check-circle"></i>
+                                            {% else %}
+                                                <i class="far fa-circle"></i>
+                                            {% endif %}
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="task-priority">
+                                        <span class="priority-dot priority-{{ task.priority }}" 
+                                              title="Prioridade: {% if task.priority == 'low' %}Baixa{% elif task.priority == 'medium' %}Média{% elif task.priority == 'high' %}Alta{% elif task.priority == 'urgent' %}Urgente{% endif %}"></span>
+                                    </div>
+                                    
+                                    <div class="task-menu">
+                                        <button class="menu-btn" onclick="showGlobalTaskMenu(this, '{% url 'task_update' task.pk %}', '{% url 'task_delete' task.pk %}')">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Task Content -->
+                                <div class="task-content">
+                                    <h3 class="task-title">{{ task.title }}</h3>
+                                    
+                                    {% if task.description %}
+                                        <p class="task-description">{{ task.description|truncatewords:12 }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="task-meta">
+                                        {% if task.due_date %}
+                                            <div class="task-date {% if task.due_date < today and not task.completed %}overdue{% elif task.due_date == today %}today{% endif %}">
+                                                <i class="fas fa-calendar"></i>
+                                                <span>{{ task.due_date|date:"d/m/Y" }}</span>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if task.category %}
+                                            <div class="task-category" style="color: {{ task.category.color }};">
+                                                <i class="{{ task.category.icon }}"></i>
+                                                <span>{{ task.category.name }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Progresso -->
+                {% if total_tasks %}
+                    <div class="progress-section">
+                        <div class="progress-card">
+                            <div class="progress-header">
+                                <span class="progress-title">Progresso do Dia</span>
+                                <span class="progress-percentage">{% widthratio completed_tasks total_tasks 100 %}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {% widthratio completed_tasks total_tasks 100 %}%;"></div>
+                            </div>
+                            <div class="progress-text">
+                                {{ completed_tasks }} de {{ total_tasks }} tarefas concluídas
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+            {% else %}
+                <!-- Estado Vazio Minimalista -->
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3 class="empty-title">Nenhuma tarefa ainda</h3>
+                    <p class="empty-description">Comece criando sua primeira tarefa para organizar seu dia</p>
+                    <button class="btn-create-first" onclick="window.location.href='{% url 'task_create' %}'">
+                        <i class="fas fa-plus"></i>
+                        Criar primeira tarefa
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Filtros de tarefas
+    function filterTasks() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const activeStatusFilter = document.querySelector('.filter-btn.active[data-type="status"]')?.dataset.filter || 'all';
+        const taskItems = document.querySelectorAll('.task-item');
+        
+        taskItems.forEach(item => {
+            const title = item.dataset.title;
+            const description = item.dataset.description;
+            const status = item.dataset.status;
+            
+            const matchesSearch = !searchTerm || title.includes(searchTerm) || description.includes(searchTerm);
+            const matchesStatus = activeStatusFilter === 'all' || status === activeStatusFilter;
+            
+            if (matchesSearch && matchesStatus) {
+                item.style.display = 'block';
+                item.style.animation = 'fadeIn 0.3s ease';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+    
+    // Botões de filtro
+    document.querySelectorAll('.filter-btn[data-type="status"]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn[data-type="status"]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            filterTasks();
+        });
+    });
+    
+    // Toggle status da tarefa
+    function toggleTaskStatus(taskId, isCompleted) {
+        console.log('toggleTaskStatus chamado:', taskId, isCompleted);
+        
+        // Buscar token CSRF
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfToken) {
+            console.error('Token CSRF não encontrado');
+            alert('Erro de segurança. Recarregue a página.');
+            return;
+        }
+        
+        console.log('Token CSRF encontrado:', csrfToken.value);
+        
+        // Desabilitar botão temporariamente para evitar cliques múltiplos
+        const button = document.querySelector(`[onclick*="toggleTaskStatus(${taskId}"]`);
+        if (button) {
+            button.disabled = true;
+            button.style.opacity = '0.5';
+        }
+        
+        const url = `/tasks/${taskId}/toggle-status/`;
+        console.log('Fazendo requisição para:', url);
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken.value
+            },
+            body: JSON.stringify({
+                completed: !isCompleted
+            })
+        })
+        .then(response => {
+            console.log('Resposta recebida:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Dados recebidos:', data);
+            if (data.success) {
+                // Atualizar visualmente antes de recarregar
+                updateTaskVisually(taskId, data.completed);
+                setTimeout(() => location.reload(), 500);
+            } else {
+                alert('Erro ao atualizar status: ' + (data.message || 'Erro desconhecido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erro de conexão: ' + error.message);
+        })
+        .finally(() => {
+            // Reabilitar botão
+            if (button) {
+                button.disabled = false;
+                button.style.opacity = '1';
+            }
+        });
+    }
+    
+    // Atualizar tarefa visualmente
+    function updateTaskVisually(taskId, completed) {
+        const taskCard = document.querySelector(`[data-task-id="${taskId}"]`);
+        if (taskCard) {
+            const statusButton = taskCard.querySelector('.status-toggle');
+            const taskItem = taskCard.closest('.task-item');
+            
+            if (completed) {
+                taskCard.classList.add('task-completed');
+                if (statusButton) {
+                    statusButton.innerHTML = '<i class="fas fa-check-circle"></i>';
+                }
+                if (taskItem) {
+                    taskItem.setAttribute('data-status', 'completed');
+                }
+            } else {
+                taskCard.classList.remove('task-completed');
+                if (statusButton) {
+                    statusButton.innerHTML = '<i class="far fa-circle"></i>';
+                }
+                if (taskItem) {
+                    taskItem.setAttribute('data-status', 'pending');
+                }
+            }
+        }
+    }
+    
+    // O código abaixo foi removido pois a lógica do menu agora é global
+    /*
+    // Menu de tarefas - VERSÃO SIMPLIFICADA E FUNCIONAL
+    function toggleTaskMenu(button) {
+        console.log('🔧 Menu clicado - VERSÃO SIMPLIFICADA');
+        
+        const dropdown = button.nextElementSibling;
+        if (!dropdown || !dropdown.classList.contains('task-menu-dropdown')) {
+            console.error('❌ Dropdown não encontrado ou classe incorreta');
+            return;
+        }
+        
+        // Fechar todos os outros menus
+        document.querySelectorAll('.task-menu-dropdown').forEach(menu => {
+            menu.style.display = 'none';
+        });
+        
+        // Verificar se já estava aberto
+        const wasOpen = dropdown.style.display === 'block';
+        
+        if (!wasOpen) {
+            console.log('✅ Abrindo menu dropdown');
+            dropdown.style.display = 'block';
+        } else {
+            console.log('❌ Fechando menu dropdown');
+            dropdown.style.display = 'none';
+        }
+    }
+    
+    // Fecha menus ao clicar fora
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.task-menu')) {
+            document.querySelectorAll('.task-menu-dropdown').forEach(menu => {
+                menu.style.display = 'none';
+            });
+        }
+    });
+    */
+
+    // Gerenciamento de Visualização
+    function initViewToggle() {
+        const savedView = localStorage.getItem('taskflow-view') || 'cards';
+        setView(savedView);
+        
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const view = this.dataset.view;
+                setView(view);
+                localStorage.setItem('taskflow-view', view);
+            });
+        });
+    }
+    
+    function setView(viewType) {
+        const tasksGrid = document.getElementById('tasksGrid');
+        const viewButtons = document.querySelectorAll('.view-btn');
+        
+        if (!tasksGrid) return;
+        
+        // Atualizar botões
+        viewButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.view === viewType);
+        });
+        
+        // Atualizar layout
+        if (viewType === 'list') {
+            tasksGrid.className = 'tasks-list';
+        } else {
+            tasksGrid.className = 'tasks-grid';
+        }
+        
+        // Aplicar animação
+        const taskItems = tasksGrid.querySelectorAll('.task-item');
+        taskItems.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                item.style.transition = 'all 0.3s ease';
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+            }, index * 50);
+        });
+    }
+    
+    // Animações de entrada
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar toggle de visualização
+        initViewToggle();
+        
+        const taskCards = document.querySelectorAll('.task-card');
+        taskCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.4s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+
+<style>
+/* Dashboard Minimalista */
+.dashboard-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding-top: 2rem;
+}
+
+/* Header */
+.dashboard-header {
+    margin-bottom: 2rem;
+}
+
+.dashboard-title {
+    margin: 0;
+    color: white;
+}
+
+.greeting {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 0.25rem;
+}
+
+.dashboard-subtitle {
+    display: block;
+    font-size: 1.1rem;
+    opacity: 0.8;
+    font-weight: 400;
+}
+
+.btn-add-task {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(10px);
+}
+
+.btn-add-task:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    color: white;
+}
+
+/* Estatísticas */
+.stats-section {
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: white;
+}
+
+.stat-total .stat-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
+.stat-completed .stat-icon { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.stat-pending .stat-icon { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.stat-overdue .stat-icon { background: linear-gradient(135deg, #fa709a, #fee140); }
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #718096;
+    font-weight: 500;
+}
+
+/* Filtros */
+.filters-section {
+    margin-bottom: 2rem;
+}
+
+.filters-bar {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.filters-controls {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+    z-index: 2;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e2e8f0;
+    background: white;
+    color: #4a5568;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.filter-btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.filter-btn.active {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+/* Toggle de Visualização */
+.view-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.view-toggle-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.view-toggle-buttons {
+    display: flex;
+    background: #f7fafc;
+    border-radius: 8px;
+    padding: 0.25rem;
+    gap: 0.25rem;
+}
+
+.view-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    background: transparent;
+    color: #718096;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.view-btn.active {
+    background: #667eea;
+    color: white;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+}
+
+.view-btn i {
+    font-size: 0.9rem;
+}
+
+.view-btn span {
+    font-weight: 500;
+}
+
+/* Grid de Tarefas */
+.tasks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Layout em Lista */
+.tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.tasks-list .task-item {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.tasks-list .task-card {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    margin: 0;
+    border-radius: 12px;
+    min-height: auto;
+    position: relative;
+    overflow: visible;
+}
+
+.tasks-list .task-header {
+    margin-bottom: 0;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 100;
+}
+
+.tasks-list .task-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 0;
+}
+
+.tasks-list .task-title {
+    margin: 0;
+    font-size: 1rem;
+    min-width: 200px;
+    flex-shrink: 0;
+}
+
+.tasks-list .task-description {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #718096;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tasks-list .task-meta {
+    flex-shrink: 0;
+    margin: 0;
+    gap: 1rem;
+}
+
+.tasks-list .task-date,
+.tasks-list .task-category {
+    font-size: 0.8rem;
+    min-width: 80px;
+}
+
+.tasks-list .priority-dot {
+    width: 8px;
+    height: 8px;
+}
+
+/* Hover especial para lista */
+.tasks-list .task-card:hover {
+    transform: translateX(4px);
+}
+
+/* Responsivo para lista */
+@media (max-width: 768px) {
+    .tasks-list .task-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .tasks-list .task-title {
+        min-width: auto;
+    }
+    
+    .tasks-list .task-meta {
+        gap: 0.5rem;
+    }
+}
+
+.task-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    position: relative;
+    border-left: 4px solid #e2e8f0;
+}
+
+.task-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Prioridades */
+.task-card.task-low { border-left-color: #48bb78; }
+.task-card.task-medium { border-left-color: #ed8936; }
+.task-card.task-high { border-left-color: #f56565; }
+.task-card.task-urgent { border-left-color: #e53e3e; }
+
+.task-completed {
+    opacity: 0.7;
+    background: #f7fafc !important;
+}
+
+.task-overdue {
+    background: linear-gradient(135deg, #fed7d7, #feb2b2) !important;
+}
+
+/* Task Header */
+.task-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.status-toggle {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: #a0aec0;
+    transition: all 0.3s ease;
+}
+
+.status-toggle:hover {
+    color: #667eea;
+    transform: scale(1.1);
+}
+
+.task-completed .status-toggle {
+    color: #48bb78;
+}
+
+.priority-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.priority-dot.priority-low { background: #48bb78; }
+.priority-dot.priority-medium { background: #ed8936; }
+.priority-dot.priority-high { background: #f56565; }
+.priority-dot.priority-urgent { background: #e53e3e; }
+
+.task-menu {
+    position: relative;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    color: #a0aec0;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.menu-btn:hover {
+    color: #4a5568;
+    background: #f7fafc;
+}
+
+.task-menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+    min-width: 120px;
+    z-index: 100;
+    display: none;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Menu dropdown simplificado para visualização em lista */
+.tasks-list .task-menu {
+    position: relative;
+}
+
+.tasks-list .task-menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+    min-width: 140px;
+    z-index: 1000;
+    display: none;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    margin-top: 0.25rem;
+}
+
+.tasks-list .task-menu-dropdown a {
+    display: block;
+    padding: 10px 15px;
+    color: #2d3748;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.tasks-list .task-menu-dropdown a:hover {
+    background: #f7fafc;
+    color: #667eea;
+}
+
+.tasks-list .task-menu-dropdown a.delete-action {
+    color: #e53e3e;
+}
+
+.tasks-list .task-menu-dropdown a.delete-action:hover {
+    background: #fed7d7;
+    color: #c53030;
+}
+
+.tasks-list .menu-btn {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.tasks-list .menu-btn:hover {
+    background: #edf2f7;
+    border-color: #667eea;
+}
+
+.task-menu-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: #4a5568;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.task-menu-dropdown a:hover {
+    background: #f7fafc;
+}
+
+.task-menu-dropdown a.delete-action {
+    color: #e53e3e;
+}
+
+/* Task Content */
+.task-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.4;
+}
+
+.task-completed .task-title {
+    text-decoration: line-through;
+    color: #a0aec0;
+}
+
+.task-description {
+    color: #718096;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 1rem 0;
+}
+
+.task-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.task-date, .task-category {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    color: #718096;
+}
+
+.task-date.overdue {
+    color: #e53e3e;
+    font-weight: 500;
+}
+
+.task-date.today {
+    color: #ed8936;
+    font-weight: 500;
+}
+
+/* Progresso */
+.progress-section {
+    margin-top: 2rem;
+}
+
+.progress-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.progress-title {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.progress-percentage {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 4px;
+    transition: width 1s ease;
+}
+
+.progress-text {
+    font-size: 0.9rem;
+    color: #718096;
+}
+
+/* Estado Vazio */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: white;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.8;
+}
+
+.empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.empty-description {
+    font-size: 1.1rem;
+    opacity: 0.8;
+    margin-bottom: 2rem;
+}
+
+.btn-create-first {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+}
+
+.btn-create-first:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .greeting {
+        font-size: 2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .filters-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .search-box {
+        min-width: auto;
+    }
+    
+    .filter-buttons {
+        justify-content: center;
+    }
+    
+    .view-toggle {
+        justify-content: center;
+    }
+    
+    .view-btn span {
+        display: none;
+    }
+    
+    .tasks-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}Entrar - TaskFlow{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        overflow-x: hidden;
+    }
+    
+    .main-content {
+        margin-top: 0 !important;
+    }
+</style>
+<div class="auth-container-clean">
+    <div class="auth-card-clean">
+        <!-- Header Section -->
+        <div class="text-center mb-4">
+            <div class="auth-icon-simple mb-3">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <h2 class="auth-title mb-2">Bem-vindo de volta!</h2>
+            <p class="auth-subtitle">Entre na sua conta para continuar</p>
+        </div>
+        
+        <!-- Form Section -->
+        <form method="post" class="auth-form" id="loginForm">
+            {% csrf_token %}
+            
+            <!-- Username Field -->
+            <div class="form-group-clean mb-3">
+                <label for="{{ form.username.id_for_label }}" class="form-label-clean">
+                    {{ form.username.label }}
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.username.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Password Field -->
+            <div class="form-group-clean mb-3">
+                <label for="{{ form.password.id_for_label }}" class="form-label-clean">
+                    {{ form.password.label }}
+                </label>
+                <div class="password-container">
+                    {{ form.password }}
+                    <button type="button" class="password-toggle-clean" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                    </button>
+                </div>
+                {% if form.password.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.password.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Remember Me -->
+            <div class="form-group-clean mb-3">
+                <div class="form-check">
+                    {{ form.remember_me }}
+                    <label for="{{ form.remember_me.id_for_label }}" class="form-check-label">
+                        {{ form.remember_me.label }}
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Error Messages -->
+            {% if form.errors %}
+                <div class="alert alert-danger mb-3">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 mb-3" id="loginBtn">
+                <i class="fas fa-sign-in-alt me-2" id="loginIcon"></i>
+                <span id="loginText">Entrar</span>
+            </button>
+        </form>
+        
+        <!-- Footer Links -->
+        <div class="auth-links">
+            <p>Não tem uma conta?</p>
+            <a href="{% url 'register' %}" class="auth-link">
+                <i class="fas fa-user-plus me-2"></i>Criar Conta
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-focus first input
+        document.getElementById('username').focus();
+        
+        // Form submission handling with spinning effect
+        const form = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginIcon = document.getElementById('loginIcon');
+        const loginText = document.getElementById('loginText');
+        
+        form.addEventListener('submit', function(e) {
+            // Prevent double submission
+            if (loginBtn.disabled) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Show spinning effect
+            loginBtn.disabled = true;
+            loginIcon.className = 'fas fa-spinner fa-spin me-2';
+            loginText.textContent = 'Entrando...';
+            
+            // Add visual feedback
+            loginBtn.style.opacity = '0.8';
+            loginBtn.style.cursor = 'not-allowed';
+            
+            // If there's an error, the page will reload and reset the button
+            // If successful, user will be redirected
+        });
+    });
+    
+    // Password toggle
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('passwordToggleIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+    
+    // Reset button state if there are form errors (page reloaded)
+    window.addEventListener('load', function() {
+        const loginBtn = document.getElementById('loginBtn');
+        const loginIcon = document.getElementById('loginIcon');
+        const loginText = document.getElementById('loginText');
+        
+        // Reset button to original state
+        loginBtn.disabled = false;
+        loginIcon.className = 'fas fa-sign-in-alt me-2';
+        loginText.textContent = 'Entrar';
+        loginBtn.style.opacity = '1';
+        loginBtn.style.cursor = 'pointer';
+    });
+</script>
+{% endblock %} 

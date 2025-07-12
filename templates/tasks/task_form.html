@@ -1,0 +1,619 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar Tarefa{% else %}Nova Tarefa{% endif %} - TaskFlow
+{% endblock %}
+
+{% block content %}
+<div class="task-form-mini">
+    <div class="container px-4 py-3">
+        <!-- Header Compacto -->
+        <div class="form-header-mini">
+            <h1 class="form-title-mini">
+                {% if form.instance.pk %}
+                    ✏️ Editar Tarefa
+                {% else %}
+                    ➕ Nova Tarefa
+                {% endif %}
+            </h1>
+            <a href="{% url 'task_list' %}" class="btn-back-mini">← Voltar</a>
+        </div>
+
+        <!-- Formulário Compacto -->
+        <div class="form-card-mini">
+            <form method="post" id="taskForm">
+                {% csrf_token %}
+                
+                <!-- Título -->
+                <div class="field-mini">
+                    <label class="label-mini">📝 Título</label>
+                    {{ form.title|add_class:'input-mini'|attr:'placeholder:Ex: Revisar relatório' }}
+                    {% if form.title.errors %}
+                        <div class="error-mini">{{ form.title.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Descrição -->
+                <div class="field-mini">
+                    <label class="label-mini">📄 Descrição</label>
+                    {{ form.description|add_class:'textarea-mini'|attr:'placeholder:Detalhes da tarefa...'|attr:'rows:3' }}
+                </div>
+
+                <!-- Grid de Campos -->
+                <div class="fields-grid-mini">
+                    <!-- Data -->
+                    <div class="field-mini">
+                        <label class="label-mini">📅 Data</label>
+                        <div class="date-input-wrapper">
+                            {{ form.due_date|add_class:'input-mini date-field' }}
+                            <i class="fas fa-calendar-alt date-icon"></i>
+                        </div>
+                        {% if form.due_date.errors %}
+                            <div class="error-mini">{{ form.due_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Prioridade -->
+                    <div class="field-mini">
+                        <label class="label-mini">🔥 Prioridade</label>
+                        <select name="priority" id="{{ form.priority.id_for_label }}" class="select-mini priority-select-mini">
+                            <option value="">Selecione a prioridade</option>
+                            <option value="low" {% if form.priority.value == 'low' %}selected{% endif %}>🟢 Baixa</option>
+                            <option value="medium" {% if form.priority.value == 'medium' %}selected{% endif %}>🟡 Média</option>
+                            <option value="high" {% if form.priority.value == 'high' %}selected{% endif %}>🟠 Alta</option>
+                            <option value="urgent" {% if form.priority.value == 'urgent' %}selected{% endif %}>🔴 Urgente</option>
+                        </select>
+                        {% if form.priority.errors %}
+                            <div class="error-mini">{{ form.priority.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Categoria -->
+                    <div class="field-mini">
+                        <label class="label-mini">📁 Categoria</label>
+                        <select name="category" id="{{ form.category.id_for_label }}" class="select-mini">
+                            <option value="">Selecione uma categoria</option>
+                            {% for choice in form.category.field.queryset %}
+                                <option value="{{ choice.pk }}" {% if form.category.value == choice.pk %}selected{% endif %}>
+                                    {{ choice.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.category.errors %}
+                            <div class="error-mini">{{ form.category.errors.0 }}</div>
+                        {% endif %}
+                        
+                        <!-- Debug: Mostrar quantas categorias existem -->
+                        <div style="font-size: 0.7rem; color: #666; margin-top: 0.25rem;">
+                            Categorias disponíveis: {{ form.category.field.queryset|length }}
+                            {% if form.category.field.queryset|length == 0 %}
+                                | <a href="{% url 'category_create' %}" target="_blank" style="color: #667eea;">Criar primeira categoria</a>
+                            {% else %}
+                                | <a href="{% url 'category_create' %}" target="_blank" style="color: #667eea;">+ Nova categoria</a>
+                            {% endif %}
+                            | <button type="button" onclick="window.location.reload()" style="background: none; border: none; color: #667eea; cursor: pointer; font-size: 0.7rem;">🔄 Recarregar</button>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="field-mini">
+                        <label class="label-mini">✅ Status</label>
+                        <div class="toggle-mini">
+                            {{ form.completed|add_class:'toggle-input-mini' }}
+                            <label for="{{ form.completed.id_for_label }}" class="toggle-label-mini">
+                                <span class="toggle-slider-mini"></span>
+                                <span class="toggle-text-mini">Concluída</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões -->
+                <div class="actions-mini">
+                    <button type="button" class="btn-reset-mini" onclick="resetForm()">
+                        🔄 Limpar
+                    </button>
+                    <button type="submit" class="btn-save-mini" id="saveBtn">
+                        <span id="saveIcon">💾</span>
+                        <span id="saveText">
+                            {% if form.instance.pk %}Atualizar{% else %}Criar{% endif %}
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Dicas Rápidas -->
+        <div class="tips-mini">
+            <div class="tip-mini">💡 <strong>Dica:</strong> Use títulos claros e específicos</div>
+            <div class="tip-mini">⏰ <strong>Lembre:</strong> Defina prazos realistas</div>
+            <div class="tip-mini">🎯 <strong>Organize:</strong> Use categorias para agrupar tarefas</div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('taskForm');
+    const saveBtn = document.getElementById('saveBtn');
+    const saveIcon = document.getElementById('saveIcon');
+    const saveText = document.getElementById('saveText');
+    const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+    const prioritySelect = document.getElementById('{{ form.priority.id_for_label }}');
+    const dateInput = document.getElementById('{{ form.due_date.id_for_label }}');
+
+    // Auto-focus
+    titleInput.focus();
+
+    // Debug para o campo de data
+    if (dateInput) {
+        console.log('Date input found:', dateInput);
+        console.log('Date input value:', dateInput.value);
+        console.log('Date input type:', dateInput.type);
+        
+        // Melhorar visualização do campo de data
+        dateInput.addEventListener('change', function() {
+            console.log('Date changed to:', this.value);
+            if (this.value) {
+                this.classList.add('has-value');
+            } else {
+                this.classList.remove('has-value');
+            }
+        });
+        
+        // Verificar se já tem valor na inicialização
+        if (dateInput.value) {
+            dateInput.classList.add('has-value');
+        }
+    }
+
+    // Update priority select visual feedback
+    function updatePriorityVisual() {
+        const value = prioritySelect.value;
+        const colors = {
+            'low': '#22c55e',
+            'medium': '#f59e0b', 
+            'high': '#f43f5e',
+            'urgent': '#dc2626'
+        };
+        
+        if (value && colors[value]) {
+            prioritySelect.style.borderLeftColor = colors[value];
+            prioritySelect.style.borderLeftWidth = '4px';
+        } else {
+            prioritySelect.style.borderLeftColor = '#e2e8f0';
+            prioritySelect.style.borderLeftWidth = '2px';
+        }
+    }
+
+    // Event listeners
+    prioritySelect.addEventListener('change', updatePriorityVisual);
+    
+    // Initialize
+    updatePriorityVisual();
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        if (!titleInput.value.trim()) {
+            e.preventDefault();
+            titleInput.focus();
+            titleInput.style.borderColor = '#ff6b6b';
+            setTimeout(() => {
+                titleInput.style.borderColor = '';
+            }, 2000);
+            return;
+        }
+
+        // Loading state
+        saveBtn.disabled = true;
+        saveIcon.textContent = '⏳';
+        saveText.textContent = 'Salvando...';
+        saveBtn.style.opacity = '0.7';
+    });
+
+    // Reset form
+    window.resetForm = function() {
+        if (confirm('Limpar todos os campos?')) {
+            form.reset();
+            titleInput.focus();
+        }
+    };
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            form.submit();
+        }
+        if (e.key === 'Escape') {
+            window.location.href = '{% url "task_list" %}';
+        }
+    });
+});
+</script>
+
+<style>
+/* Container Principal */
+.task-form-mini {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1rem 0;
+}
+
+/* Header Compacto */
+.form-header-mini {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.form-title-mini {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-back-mini {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.btn-back-mini:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-1px);
+    color: white;
+}
+
+/* Card do Formulário */
+.form-card-mini {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+/* Campos */
+.field-mini {
+    margin-bottom: 1rem;
+}
+
+.label-mini {
+    display: block;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.input-mini, .textarea-mini, .select-mini {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+    color: #2d3748;
+}
+
+/* CSS específico para campos de data */
+.input-mini[type="date"] {
+    color: #2d3748 !important;
+    background: #ffffff !important;
+    border: 2px solid #e2e8f0 !important;
+}
+
+.input-mini[type="date"]:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Garantir que o valor da data seja visível */
+.input-mini[type="date"]::-webkit-calendar-picker-indicator {
+    color: #4a5568;
+    background: transparent;
+    cursor: pointer;
+}
+
+.input-mini[type="date"]::-webkit-inner-spin-button {
+    display: none;
+}
+
+.input-mini[type="date"]::-webkit-clear-button {
+    display: none;
+}
+
+/* Wrapper para o campo de data */
+.date-input-wrapper {
+    position: relative;
+}
+
+.date-field {
+    padding-right: 3rem;
+}
+
+.date-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #667eea;
+    font-size: 1rem;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Melhorar visualização quando há valor */
+.date-field:not(:placeholder-shown) {
+    font-weight: 500;
+    color: #2d3748;
+}
+
+/* Estilo para quando o campo está vazio */
+.date-field:invalid {
+    color: #a0aec0;
+}
+
+/* Estilo para quando o campo tem valor */
+.date-field:valid {
+    color: #2d3748;
+    font-weight: 500;
+}
+
+/* Classe adicionada pelo JavaScript quando há valor */
+.date-field.has-value {
+    color: #2d3748 !important;
+    font-weight: 600 !important;
+    background: #ffffff !important;
+    border-color: #667eea !important;
+}
+
+.input-mini:focus, .textarea-mini:focus, .select-mini:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-1px);
+}
+
+.textarea-mini {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Grid de Campos */
+.fields-grid-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Toggle Switch Minimalista */
+.toggle-mini {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.toggle-input-mini {
+    display: none;
+}
+
+.toggle-label-mini {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    margin: 0;
+}
+
+.toggle-slider-mini {
+    width: 40px;
+    height: 20px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.toggle-slider-mini::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.toggle-input-mini:checked + .toggle-label-mini .toggle-slider-mini {
+    background: #48bb78;
+}
+
+.toggle-input-mini:checked + .toggle-label-mini .toggle-slider-mini::before {
+    transform: translateX(20px);
+}
+
+.toggle-text-mini {
+    font-weight: 500;
+    color: #4a5568;
+    font-size: 0.9rem;
+}
+
+/* Botões */
+.actions-mini {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+.btn-reset-mini, .btn-save-mini {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.btn-reset-mini {
+    background: #f7fafc;
+    color: #4a5568;
+    border: 2px solid #e2e8f0;
+}
+
+.btn-reset-mini:hover {
+    background: #edf2f7;
+    transform: translateY(-1px);
+}
+
+.btn-save-mini {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.btn-save-mini:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+}
+
+.btn-save-mini:disabled {
+    cursor: not-allowed;
+}
+
+/* Dicas Rápidas */
+.tips-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.75rem;
+}
+
+.tip-mini {
+    background: rgba(255,255,255,0.9);
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #4a5568;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* Erros */
+.error-mini {
+    color: #e53e3e;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .form-header-mini {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .form-title-mini {
+        font-size: 1.5rem;
+    }
+    
+    .fields-grid-mini {
+        grid-template-columns: 1fr;
+    }
+    
+    .actions-mini {
+        flex-direction: column;
+    }
+    
+    .btn-reset-mini, .btn-save-mini {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .tips-mini {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animações */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-card-mini, .tips-mini {
+    animation: slideUp 0.5s ease;
+}
+
+/* Hover effects nos campos */
+.input-mini:hover, .textarea-mini:hover, .select-mini:hover {
+    border-color: #cbd5e0;
+    background: white;
+}
+
+/* Estilo para selects */
+.select-mini {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* Select de Prioridade Específico */
+.priority-select-mini {
+    font-weight: 500;
+}
+
+.priority-select-mini option {
+    padding: 0.5rem;
+    font-weight: 500;
+}
+
+.priority-select-mini option[value="low"] {
+    color: #22c55e;
+}
+
+.priority-select-mini option[value="medium"] {
+    color: #f59e0b;
+}
+
+.priority-select-mini option[value="high"] {
+    color: #f43f5e;
+}
+
+.priority-select-mini option[value="urgent"] {
+    color: #dc2626;
+}
+</style>
+{% endblock %} 

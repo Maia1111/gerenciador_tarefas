@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Logout - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="auth-container-clean">
+    <div class="auth-card-clean text-center">
+        <!-- Header Section -->
+        <div class="mb-4">
+            <div class="auth-icon-simple mb-3">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+            <h2 class="auth-title mb-2">Até logo!</h2>
+            <p class="auth-subtitle">Você foi desconectado com sucesso</p>
+        </div>
+        
+        <!-- Actions -->
+        <div class="auth-links">
+            <a href="{% url 'login' %}" class="auth-link">
+                <i class="fas fa-sign-in-alt me-2"></i>Fazer Login Novamente
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Redirecionar automaticamente após 3 segundos
+setTimeout(function() {
+    window.location.href = "{% url 'login' %}";
+}, 3000);
+</script>
+{% endblock %} 

@@ -1,0 +1,16 @@
+HTTP/1.1 302 Found
+Date: Sat, 12 Jul 2025 03:08:31 GMT
+Server: WSGIServer/0.2 CPython/3.12.4
+Content-Type: text/html; charset=utf-8
+Location: /tasks/
+Expires: Sat, 12 Jul 2025 03:08:31 GMT
+Cache-Control: max-age=0, no-cache, no-store, must-revalidate, private
+Vary: Cookie
+X-Frame-Options: DENY
+Content-Length: 0
+X-Content-Type-Options: nosniff
+Referrer-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+Set-Cookie:  csrftoken=4dZpoHpU3ImrXH4yealhtb58NENJTx45; expires=Sat, 11 Jul 2026 03:08:31 GMT; Max-Age=31449600; Path=/; SameSite=Lax
+Set-Cookie:  sessionid=15r8h6qjmykpgm3kozc9auoi1zbsmpwh; expires=Sat, 26 Jul 2025 03:08:31 GMT; HttpOnly; Max-Age=1209600; Path=/; SameSite=Lax
+
