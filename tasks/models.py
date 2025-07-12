@@ -10,11 +10,13 @@ class Category(models.Model):
         name (str): Nome da categoria
         color (str): Cor hexadecimal da categoria
         icon (str): Ícone FontAwesome da categoria
+        description (str): Descrição opcional da categoria
         user (User): Usuário dono da categoria
     """
     name = models.CharField(max_length=100)
     color = models.CharField(max_length=7, default='#7c3aed')  # Hex color
     icon = models.CharField(max_length=50, default='fas fa-folder')
+    description = models.TextField(blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(default=timezone.now)
     

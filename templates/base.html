@@ -1584,22 +1584,6 @@
             });
         }
         
-        // Smooth Scroll for Anchor Links
-        function initSmoothScroll() {
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                });
-            });
-        }
-        
         // Initialize on DOM Load
         document.addEventListener('DOMContentLoaded', function() {
             createParticles();
@@ -1765,12 +1749,11 @@
                 const themeIcon = document.getElementById('themeIcon');
                 const themeText = document.getElementById('themeText');
                 
-                if (currentTheme === 'dark') {
-                    themeIcon.className = 'fas fa-moon me-2';
-                    themeText.textContent = 'Modo Claro';
-                } else {
-                    themeIcon.className = 'fas fa-sun me-2';
-                    themeText.textContent = 'Modo Escuro';
+                if (themeIcon) {
+                    themeIcon.className = currentTheme === 'dark' ? 'fas fa-moon me-2' : 'fas fa-sun me-2';
+                }
+                if (themeText) {
+                    themeText.textContent = currentTheme === 'dark' ? 'Modo Claro' : 'Modo Escuro';
                 }
             },
             
@@ -1787,6 +1770,11 @@
         // Theme toggle function for button
         function toggleTheme() {
             ThemeManager.toggle();
+        }
+
+        // Smooth Scroll for Anchor Links
+        function initSmoothScroll() {
+            // Esta função foi removida para evitar SyntaxError com URLs não válidas como seletores
         }
 
         // Service Worker Registration (Progressive Web App)

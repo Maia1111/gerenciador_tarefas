@@ -434,6 +434,59 @@
         });
     }
     
+    // Função para menu global de tarefas
+    let currentMenu = null;
+    
+    function showGlobalTaskMenu(button, updateUrl, deleteUrl) {
+        if (currentMenu) {
+            currentMenu.remove();
+            currentMenu = null;
+        }
+        const menu = document.createElement('div');
+        menu.className = 'task-menu-dropdown';
+        menu.style.position = 'absolute';
+        menu.style.background = 'white';
+        menu.style.border = '1px solid #e2e8f0';
+        menu.style.borderRadius = '8px';
+        menu.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        menu.style.zIndex = '1000';
+        menu.style.minWidth = '150px';
+        menu.style.padding = '0.5rem 0';
+        menu.innerHTML = [
+            '<a href="' + updateUrl + '" class="menu-item" style="display: block; padding: 0.5rem 1rem; color: #4a5568; text-decoration: none;">',
+            '<i class="fas fa-edit me-2"></i> Editar',
+            '</a>',
+            '<a href="' + deleteUrl + '" class="menu-item" style="display: block; padding: 0.5rem 1rem; color: #e53e3e; text-decoration: none;">',
+            '<i class="fas fa-trash me-2"></i> Excluir',
+            '</a>'
+        ].join('');
+        document.body.appendChild(menu);
+        const rect = button.getBoundingClientRect();
+        menu.style.top = (rect.bottom + window.scrollY) + 'px';
+        menu.style.left = (rect.left + window.scrollX) + 'px';
+        currentMenu = menu;
+        function closeMenu(e) {
+            // Se clicou em um link do menu, deixa o navegador processar o clique antes de remover o menu
+            if (menu.contains(e.target) && e.target.tagName === 'A') {
+                setTimeout(function() {
+                    if (menu) menu.remove();
+                    currentMenu = null;
+                    document.removeEventListener('click', closeMenu);
+                }, 100);
+                return;
+            }
+            // Se clicou fora, remove imediatamente
+            if (!menu.contains(e.target) && e.target !== button) {
+                menu.remove();
+                currentMenu = null;
+                document.removeEventListener('click', closeMenu);
+            }
+        }
+        setTimeout(function() {
+            document.addEventListener('click', closeMenu);
+        }, 0);
+    }
+    
     // Animações de entrada
     document.addEventListener('DOMContentLoaded', function() {
         // Inicializar toggle de visualização

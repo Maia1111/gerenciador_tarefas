@@ -76,7 +76,7 @@ class CategoryForm(forms.ModelForm):
     """
     class Meta:
         model = Category
-        fields = ['name', 'color', 'icon']
+        fields = ['name', 'color', 'icon', 'description']
         widgets = {
             'color': forms.TextInput(attrs={
                 'type': 'color',
@@ -94,6 +94,11 @@ class CategoryForm(forms.ModelForm):
                 ('fas fa-code', 'Programação'),
                 ('fas fa-book', 'Leitura'),
             ]),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control-modern',
+                'rows': 3,
+                'placeholder': 'Descreva o propósito desta categoria...'
+            }),
         }
     
     def __init__(self, *args, **kwargs):

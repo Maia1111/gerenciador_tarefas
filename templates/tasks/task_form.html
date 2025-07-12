@@ -588,6 +588,14 @@ document.addEventListener('DOMContentLoaded', function() {
     background-repeat: no-repeat;
     background-size: 1.5em 1.5em;
     padding-right: 2.5rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Remover seta padrão do navegador */
+.select-mini::-ms-expand {
+    display: none;
 }
 
 /* Select de Prioridade Específico */
